@@ -55,30 +55,37 @@ def scrape_ollama_library():
 def parse_content(soup):
     models = []
     li_elements = soup.find_all('li', class_='flex items-baseline border-b border-neutral-200 py-6')
-    
+
+    # In case none of the models are found, look at these classes and change them accordingly based on
+    # the latest data in "code/ollama_models_html.txt" that is pulled from "https://ollama.com/library"
+    model_name_elem_class = 'truncate text-xl font-medium underline-offset-2 md:text-2xl'
+    model_desc_elem_class = 'max-w-lg break-words text-neutral-800 text-md'
+    model_size_elements_class = 'inline-flex items-center rounded-md bg-[#ddf4ff] px-2 py-0.5 text-xs font-medium text-blue-600 sm:text-[13px]'
+    model_stats_elem_class = 'my-4 flex space-x-5 text-[13px] font-medium text-neutral-500'
+
     for li in li_elements:
         model = {}
         
         # Extract name
-        name_elem = li.find('h2', class_='truncate text-lg font-medium underline-offset-2 group-hover:underline md:text-2xl')
+        name_elem = li.find('h2', class_ = model_name_elem_class)
         if name_elem and name_elem.find('span'):
             model['name'] = name_elem.find('span').text.strip()
         
         # Extract description
-        desc_elem = li.find('p', class_='max-w-md break-words')
+        desc_elem = li.find('p', class_ = model_desc_elem_class)
         if desc_elem:
             model['description'] = desc_elem.text.strip()
         
         # Extract sizes
         sizes = []
-        size_elements = li.find_all('span', class_='inline-flex items-center rounded-md bg-[#ddf4ff] px-2 py-[2px] text-xs sm:text-[13px] font-medium text-blue-600')
+        size_elements = li.find_all('span', class_ = model_size_elements_class)
         for size_elem in size_elements:
             sizes.append(size_elem.text.strip())
         if sizes:
             model['sizes'] = sizes
         
         # Extract pulls, tags, and last updated
-        stats_elem = li.find('p', class_='my-2 flex space-x-5 text-[13px] font-medium text-neutral-500')
+        stats_elem = li.find('p', class_ = model_stats_elem_class)
         if stats_elem:
             spans = stats_elem.find_all('span', class_='flex items-center')
             for span in spans:
