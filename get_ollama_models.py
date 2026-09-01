@@ -12,24 +12,27 @@ def scrape_ollama_library():
     # Create the './code/' directory if it doesn't exist
     os.makedirs('./code/', exist_ok=True)
     
-    if os.path.exists(input_file_path):
-        print("Reading from existing file...")
-        with open(input_file_path, 'r', encoding='utf-8') as file:
-            content = file.read()
-    else:
+    try:
         print("Scraping website...")
         url = "https://ollama.com/library"
-        response = requests.get(url)
-        
-        if response.status_code != 200:
-            print(f"Failed to retrieve the page. Status code: {response.status_code}")
-            return
-        
+        response = requests.get(
+            url,
+            headers={"User-Agent": "ollama-get-models/1.0"},
+            timeout=30,
+        )
+        response.raise_for_status()
         content = response.text
-        
+
         # Save the raw HTML content to file
         with open(input_file_path, 'w', encoding='utf-8') as file:
             file.write(content)
+    except requests.RequestException as exc:
+        if not os.path.exists(input_file_path):
+            print(f"Failed to retrieve the page and no cache is available: {exc}")
+            return
+        print(f"Live request failed; reading cached HTML instead: {exc}")
+        with open(input_file_path, 'r', encoding='utf-8') as file:
+            content = file.read()
     
     # Parse the content and extract information
     soup = BeautifulSoup(content, 'html.parser')

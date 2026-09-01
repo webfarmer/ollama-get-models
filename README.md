@@ -11,3 +11,12 @@ The extracted information is printed to the console and also saved as a JSON fil
 The script includes error handling for failed web requests and creates necessary directories if they don't exist.
 
 This code allows users to easily obtain and store up-to-date information about available models in the Ollama library without manually browsing the website.
+
+## Usage
+
+```bash
+python -m pip install -r requirements.txt
+python get_ollama_models.py
+```
+
+The script fetches the current library page on every run. If Ollama is temporarily unavailable, it falls back to the last cached HTML response.
